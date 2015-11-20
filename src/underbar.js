@@ -51,7 +51,6 @@
   _.each = function(collection, iterator) {
       if(Array.isArray(collection)) {
         for(var i = 0; i < collection.length; i++) {
-          console.log(collection[i]);
           iterator(collection[i], i, collection);
         }
       }
@@ -83,8 +82,8 @@
   _.filter = function(collection, test) {
     var passed = [];
 
-    _.each(collection, function(item) {
-      if(test(item)) passed.push(item);
+    _.each(collection, function(item, index, array) {
+      if(test(item, index, array)) passed.push(item);
     });
 
     return passed;
@@ -94,7 +93,7 @@
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
-    return _.filter(collection, function(item) { return !test(item);} );
+    return _.filter(collection, function(item, index, array) { return !test(item, index, array);} );
   };
 
   // Produce a duplicate-free version of the array.
@@ -116,7 +115,7 @@
     // the members, it also maintains an array of results.
     var final = [];
     
-    _.each(collection, function(item) {final.push(iterator(item));} );
+    _.each(collection, function(item, index, array) {final.push(iterator(item, index, array));} );
 
     return final;
   };
@@ -134,7 +133,7 @@
     // TIP: map is really handy when you want to transform an array of
     // values into a new array of values. _.pluck() is solved for you
     // as an example of this.
-    return _.map(collection, function(item){
+    return _.map(collection, function(item, keys, collection){
       return item[key];
     });
   };
@@ -162,8 +161,8 @@
   _.reduce = function(collection, iterator, accumulator) {
       if(accumulator == null) accumulator = collection.shift();
 
-      _.each(collection, function(item) {
-        accumulator = iterator(accumulator, item);
+      _.each(collection, function(item, index, array) {
+        accumulator = iterator(accumulator, item, index, array);
       });
 
       return accumulator;
@@ -187,9 +186,9 @@
     // TIP: Try re-using reduce() here.
     if(iterator == null) iterator = _.identity;
 
-    return _.reduce(collection, function(lastResult, item) {
+    return _.reduce(collection, function(lastResult, item, index, array) {
       if(!lastResult) return false;
-      return iterator(item);
+      return iterator(item, index, array);
     }, true) ? true: false;
   };
 
@@ -199,7 +198,7 @@
     // TIP: There's a very clever way to re-use every() here
     if(iterator == null) iterator = _.identity;
 
-    return _.every(collection, function(item) {return !iterator(item)}) ? false : true;
+    return _.every(collection, function(item, index, array) {return !iterator(item, index, array)}) ? false : true;
   };
 
 
