@@ -285,6 +285,28 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var argsList = [];
+    var resultsList = [];
+
+    return function() {
+      var n_args = Array.prototype.slice.call(arguments, 0);
+      var resultsIndex = -1;
+
+      _.each(argsList, function(args, argsNum) {
+        if(resultsIndex != -1) return;
+        var compare = _.every(args, function(item, index) {return args[index] == n_args[index]});
+        if(compare && args.length == n_args.length) resultsIndex = argsNum;
+      });
+        
+
+      if(resultsIndex == -1) {
+        argsList.push(n_args);
+        resultsList.push(func.apply(this, arguments));
+        resultsIndex = resultsList.length - 1;
+      }
+
+      return resultsList[resultsIndex]
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
