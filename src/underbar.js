@@ -285,28 +285,19 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var argsList = [];
-    var resultsList = [];
-
-    return function() {
-      var n_args = Array.prototype.slice.call(arguments, 0);
-      var resultsIndex = -1;
-
-      _.each(argsList, function(args, argsNum) {
-        if(resultsIndex != -1) return;
-        var compare = _.every(args, function(item, index) {return args[index] == n_args[index]});
-        if(compare && args.length == n_args.length) resultsIndex = argsNum;
-      });
-        
-
-      if(resultsIndex == -1) {
-        argsList.push(n_args);
-        resultsList.push(func.apply(this, arguments));
-        resultsIndex = resultsList.length - 1;
+    var argsObject = {};
+    var returnFunc = function() {
+      var args1 = Array.prototype.slice.call(arguments);
+      var key1 = args1.toString(); //Should work assuming arguments are primitives
+      if(!argsObject.hasOwnProperty(key1)) {
+        var result = func.apply(this, args1);
+        argsObject[key1] = result;
       }
-
-      return resultsList[resultsIndex]
+      return argsObject[key1];
     };
+
+    return returnFunc;
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -359,6 +350,13 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    _.each(collection, function(value, key, collection) {
+      if(!Array.isArray(args)) args = [args];
+      var allArgs = args.unshift(value);
+      console.log(allArgs);
+      if(typeof functionOrKey == "function") functionOrKey.apply(this, allArgs);
+      else if (typeof functionOrKey == "string") value[functionOrKey].apply(this, args)
+    } );
   };
 
   // Sort the object's values by a criterion produced by an iterator.
